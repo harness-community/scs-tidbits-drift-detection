@@ -37,8 +37,8 @@ pipeline:
                   name: Build and Push Docker Image
                   identifier: Build_and_Push_Docker_Image
                   spec:
-                    connectorRef: <YOUR_DOCKERHUB_CONNECTOR>
-                    repo: <YOUR_DOCKERHUB_USERNAME>/scs-tidbit-drift-app
+                    connectorRef: nidadockerconnector
+                    repo: nidayra/scs-tidbit-drift-app
                     tags:
                       - <+pipeline.variables.artifact_tag>
                     caching: false
@@ -52,8 +52,8 @@ pipeline:
                     source:
                       type: docker
                       spec:
-                        connector: <YOUR_DOCKERHUB_CONNECTOR>
-                        image: <YOUR_DOCKERHUB_USERNAME>/scs-tidbit-drift-app:<+pipeline.variables.artifact_tag>
+                        connector: nidadockerconnector
+                        image: nidayra/scs-tidbit-drift-app:<+pipeline.variables.artifact_tag>
                     signing:
                       type: keyless
                       spec:
@@ -70,8 +70,8 @@ pipeline:
                     source:
                       type: docker
                       spec:
-                        connector: <YOUR_DOCKERHUB_CONNECTOR>
-                        repo: <YOUR_DOCKERHUB_USERNAME>/scs-tidbit-drift-app:<+pipeline.variables.artifact_tag>
+                        connector: nidadockerconnector
+                        repo: nidayra/scs-tidbit-drift-app:<+pipeline.variables.artifact_tag>
                     attestation:
                       type: keyless
                       spec:
@@ -108,8 +108,8 @@ pipeline:
                     source:
                       type: docker
                       spec:
-                        connector: <YOUR_DOCKERHUB_CONNECTOR>
-                        image: <YOUR_DOCKERHUB_USERNAME>/scs-tidbit-drift-app:<+pipeline.variables.artifact_tag>
+                        connector: nidadockerconnector
+                        image: nidayra/scs-tidbit-drift-app:<+pipeline.variables.artifact_tag>
                     verifySign:
                       type: keyless
                       spec:
@@ -126,8 +126,8 @@ pipeline:
                     source:
                       type: Docker
                       spec:
-                        connector: <YOUR_DOCKERHUB_CONNECTOR>
-                        image_path: <YOUR_DOCKERHUB_USERNAME>/scs-tidbit-drift-app:<+pipeline.variables.artifact_tag>
+                        connector: nidadockerconnector
+                        image_path: nidayra/scs-tidbit-drift-app:<+pipeline.variables.artifact_tag>
                         tag: <+pipeline.variables.artifact_tag>
                     verify_attestation:
                       type: keyless
