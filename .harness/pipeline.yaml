@@ -14,12 +14,12 @@ pipeline:
   variables:
     - name: artifact_tag
       type: String
-      description: "Tag of the image to build (or, when re-running only the Verify stage, the tag to check for drift)"
+      description: Tag of the image to build (or, when re-running only the Verify stage, the tag to check for drift)
       required: true
       value: <+input>
   stages:
     - stage:
-        name: Build - Sign and Attest
+        name: Build Sign and Attest
         identifier: Build_Sign_and_Attest
         type: CI
         spec:
@@ -37,7 +37,7 @@ pipeline:
                   name: Build and Push Docker Image
                   identifier: Build_and_Push_Docker_Image
                   spec:
-                    connectorRef: <YOUR_DOCKER_CONNECTOR>
+                    connectorRef: <YOUR_DOCKERHUB_CONNECTOR>
                     repo: <YOUR_DOCKERHUB_USERNAME>/scs-tidbit-drift-app
                     tags:
                       - <+pipeline.variables.artifact_tag>
@@ -52,7 +52,7 @@ pipeline:
                     source:
                       type: docker
                       spec:
-                        connector: <YOUR_DOCKER_CONNECTOR>
+                        connector: <YOUR_DOCKERHUB_CONNECTOR>
                         image: <YOUR_DOCKERHUB_USERNAME>/scs-tidbit-drift-app:<+pipeline.variables.artifact_tag>
                     signing:
                       type: keyless
@@ -70,8 +70,8 @@ pipeline:
                     source:
                       type: docker
                       spec:
-                        connector: <YOUR_DOCKER_CONNECTOR>
-                        repo: <YOUR_DOCKERHUB_USERNAME>/scs-tidbit-drift-app
+                        connector: <YOUR_DOCKERHUB_CONNECTOR>
+                        repo: <YOUR_DOCKERHUB_USERNAME>/scs-tidbit-drift-app:<+pipeline.variables.artifact_tag>
                     attestation:
                       type: keyless
                       spec:
@@ -108,7 +108,7 @@ pipeline:
                     source:
                       type: docker
                       spec:
-                        connector: <YOUR_DOCKER_CONNECTOR>
+                        connector: <YOUR_DOCKERHUB_CONNECTOR>
                         image: <YOUR_DOCKERHUB_USERNAME>/scs-tidbit-drift-app:<+pipeline.variables.artifact_tag>
                     verifySign:
                       type: keyless
@@ -124,10 +124,10 @@ pipeline:
                   identifier: Verify_SLSA_Provenance
                   spec:
                     source:
-                      type: docker
+                      type: Docker
                       spec:
-                        connector: <YOUR_DOCKER_CONNECTOR>
-                        image_path: <YOUR_DOCKERHUB_USERNAME>/scs-tidbit-drift-app
+                        connector: <YOUR_DOCKERHUB_CONNECTOR>
+                        image_path: <YOUR_DOCKERHUB_USERNAME>/scs-tidbit-drift-app:<+pipeline.variables.artifact_tag>
                         tag: <+pipeline.variables.artifact_tag>
                     verify_attestation:
                       type: keyless
