@@ -8,7 +8,7 @@ pipeline:
   properties:
     ci:
       codebase:
-        connectorRef: <YOUR_GITHUB_CONNECTOR>
+        connectorRef: nidagithubconnector
         build: <+input>
         sparseCheckout: []
   variables:
