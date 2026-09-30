@@ -1,8 +1,8 @@
 pipeline:
   name: scs-tidbits-drift-detection
   identifier: scstidbitsdriftdetection
-  projectIdentifier: <YOUR_PROJECT_ID>
-  orgIdentifier: <YOUR_ORG_ID>
+  projectIdentifier: nidatidbitsproject
+  orgIdentifier: default
   tags: {}
   allowStageExecutions: true
   properties:
