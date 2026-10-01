@@ -1,0 +1,139 @@
+pipeline:
+  name: scs-tidbits-drift-detection
+  identifier: scstidbitsdriftdetection
+  projectIdentifier: <YOUR_PROJECT_ID>
+  orgIdentifier: <YOUR_ORG_ID>
+  tags: {}
+  allowStageExecutions: true
+  properties:
+    ci:
+      codebase:
+        connectorRef: <YOUR_GITHUB_CONNECTOR>
+        build: <+input>
+        sparseCheckout: []
+  variables:
+    - name: artifact_tag
+      type: String
+      description: Tag of the image to build (or, when re-running only the Verify stage, the tag to check for drift)
+      required: true
+      value: <+input>
+  stages:
+    - stage:
+        name: Build Sign and Attest
+        identifier: Build_Sign_and_Attest
+        type: CI
+        spec:
+          cloneCodebase: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: BuildAndPushDockerRegistry
+                  name: Build and Push Docker Image
+                  identifier: Build_and_Push_Docker_Image
+                  spec:
+                    connectorRef: <YOUR_DOCKERHUB_CONNECTOR>
+                    repo: <YOUR_DOCKERHUB_USERNAME>/scs-tidbit-drift-app
+                    tags:
+                      - <+pipeline.variables.artifact_tag>
+                    caching: false
+                    dockerfile: Dockerfile
+                    context: .
+              - step:
+                  type: SscaArtifactSigning
+                  name: Sign Artifact
+                  identifier: Sign_Artifact
+                  spec:
+                    source:
+                      type: docker
+                      spec:
+                        connector: <YOUR_DOCKERHUB_CONNECTOR>
+                        image: YOUR_DOCKERHUB_USERNAME/scs-tidbit-drift-app:<+pipeline.variables.artifact_tag>
+                    signing:
+                      type: keyless
+                      spec:
+                        oidcProvider: harness
+                    resources:
+                      limits:
+                        memory: 500Mi
+                        cpu: "0.5"
+              - step:
+                  type: provenance
+                  name: Generate SLSA Provenance
+                  identifier: Generate_SLSA_Provenance
+                  spec:
+                    source:
+                      type: docker
+                      spec:
+                        connector: <YOUR_DOCKERHUB_CONNECTOR>
+                        repo: YOUR_DOCKERHUB_USERNAME/scs-tidbit-drift-app:<+pipeline.variables.artifact_tag>
+                    attestation:
+                      type: keyless
+                      spec:
+                        oidcProvider: harness
+                    resources:
+                      limits:
+                        memory: 500Mi
+                        cpu: "0.5"
+    - stage:
+        name: Verify and Detect Drift
+        identifier: Verify_and_Detect_Drift
+        type: CI
+        spec:
+          cloneCodebase: false
+          caching:
+            enabled: false
+            override: false
+            paths: []
+          buildIntelligence:
+            enabled: false
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: SscaArtifactVerification
+                  name: Verify Artifact Signature
+                  identifier: Verify_Artifact_Signature
+                  spec:
+                    source:
+                      type: docker
+                      spec:
+                        connector: <YOUR_DOCKERHUB_CONNECTOR>
+                        image: YOUR_DOCKERHUB_USERNAME/scs-tidbit-drift-app:<+pipeline.variables.artifact_tag>
+                    verifySign:
+                      type: keyless
+                      spec:
+                        oidcProvider: harness
+                    resources:
+                      limits:
+                        memory: 500Mi
+                        cpu: "0.5"
+              - step:
+                  type: SlsaVerification
+                  name: Verify SLSA Provenance
+                  identifier: Verify_SLSA_Provenance
+                  spec:
+                    source:
+                      type: Docker
+                      spec:
+                        connector: <YOUR_DOCKERHUB_CONNECTOR>
+                        image_path: YOUR_DOCKERHUB_USERNAME/scs-tidbit-drift-app:<+pipeline.variables.artifact_tag>
+                        tag: <+pipeline.variables.artifact_tag>
+                    verify_attestation:
+                      type: keyless
+                      spec:
+                        oidcProvider: harness
+                    resources:
+                      limits:
+                        memory: 500Mi
+                        cpu: "0.5"
